@@ -96,7 +96,7 @@ exports.update = function(req, res) {
     res.render('quizes/edit', {quiz: quiz, errors: errores});
   } else {
     req.quiz // save: guarda en DB campos pregunta y respuesta de quiz
-    .save({fields: ["pregunta", "respuesta", "otro"]})
+    .save({fields: ["pregunta", "respuesta", "tema"]})
     .then( function(){res.redirect('/quizes')})
   }         // res.redirect: Redirección HTTP a lista de preguntas (URL relativo)
 };
