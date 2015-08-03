@@ -62,17 +62,19 @@ exports.new = function(req, res) {
 exports.create = function(req, res) {
   var quiz = models.Quiz.build( req.body.quiz );
 
-  var errors = quiz.validate();
-  if(errors){
-    var i=0;
-    var errores=new Array();//se convierte en [] con la propiedad message por compatibilida con layout
-    for (var prop in errors) errores[i++]={message: errors[prop]};	
-    res.render('quizes/new', {quiz: quiz, errors: errores});
-  } else {
-    quiz // save: guarda en DB campos pregunta y respuesta de quiz
-    .save({fields: ["pregunta", "respuesta", "tema"]})
-    .then( function(){res.redirect('/quizes')})
-  }         // res.redirect: Redirección HTTP a lista de preguntas
+  quiz
+  .validate()
+  .then(
+    function(err){
+      if(err) {
+        res.render('quizes/new', {quiz: quiz, errors: err.errors});
+      } else {
+        quiz // save: guarda en DB campos pregunta y respuesta de quiz
+        .save({fields: ["pregunta", "respuesta", "tema"]})
+        .then( function(){res.redirect('/quizes')})
+      }         // res.redirect: Redirección HTTP a lista de preguntas
+    }
+  );
 };
 
 // GET /quizes/:id/edit
@@ -88,17 +90,19 @@ exports.update = function(req, res) {
   req.quiz.respuesta = req.body.quiz.respuesta;
   req.quiz.tema = req.body.quiz.tema;
 
-  var errors = req.quiz.validate();
-  if(errors){
-    var i=0;
-    var errores=new Array();//se convierte en [] con la propiedad message por compatibilida con layout
-    for (var prop in errors) errores[i++]={message: errors[prop]};
-    res.render('quizes/edit', {quiz: quiz, errors: errores});
-  } else {
-    req.quiz // save: guarda en DB campos pregunta y respuesta de quiz
-    .save({fields: ["pregunta", "respuesta", "tema"]})
-    .then( function(){res.redirect('/quizes')})
-  }         // res.redirect: Redirección HTTP a lista de preguntas (URL relativo)
+  req.quiz
+  .validate()
+  .then(
+    function(err){
+      if(err){
+        res.render('quizes/edit', {quiz: req.quiz, errors: err.errors});
+      } else {
+        req.quiz // save: guarda en DB campos pregunta y respuesta de quiz
+        .save({fields: ["pregunta", "respuesta", "tema"]})
+        .then( function(){res.redirect('/quizes')})
+      }         // res.redirect: Redirección HTTP a lista de preguntas (URL relativo)
+    }
+  );
 };
 
 // DELETE /quizes/:id
