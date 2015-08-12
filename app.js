@@ -41,6 +41,35 @@ app.use(function(req, res, next) {
   next();
 });
 
+// Auto-Logout
+app.use(function (req, res, next) {
+  var inactividad = 2;
+  var timeout = inactividad*60*1000;	//minutos en milisegundos
+
+  // Existe la sesión
+  if (req.session.user) {
+    // Se inicializa o se recupera la última petición
+    req.session.ultimaPeticion = req.session.ultimaPeticion || new Date().getTime();
+
+    // Tiempo entre peticiones
+    var ahora = new Date();
+    var diferencia = ahora.getTime() - req.session.ultimaPeticion;
+
+    // Si ha pasado mas de "timeout" desde la última petición, cerramos la sesión        
+    if (diferencia > timeout) {
+      console.log('Cerrando sesión automáticamente, ' + inactividad + ' minutos de inactividad.')
+      delete req.session.user;
+    }
+        
+    // Actualizamos ultima peticion
+    req.session.ultimaPeticion = ahora.getTime();
+        
+    console.log('Última petición realizada ' + ahora)
+  }
+
+  next();
+});
+
 app.use('/', routes);
 
 // catch 404 and forward to error handler
